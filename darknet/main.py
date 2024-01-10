@@ -2,6 +2,7 @@ import pygame, sys, cv2, numpy, tkinter, tkinter.filedialog
 from button import Button
 from vc_mask_img import process_img
 from vc_mask_img import process_darknet
+import numpy as np
 
 pygame.init()
 
@@ -71,12 +72,18 @@ def start():
         # Update the window
         pygame.display.update()
 
-PREV_FRAME = 0
+PREV_FRAME = np.zeros((550, 800, 3), dtype=np.uint8)
 PREV_COLORS = []
+network = 0
+class_names = 0
+width = 0
+height = 0
+
 
 # Function for playing a video file
 def play_video():
     global PREV_FRAME, PREV_COLORS
+    global network, class_names, width, height
 
     # Get the video file name
     FILE_NAME, type = prompt_file()
@@ -99,7 +106,7 @@ def play_video():
     BLUE_COUNT = 0
     RED_COUNT = 0
 
-    network, class_names, width, height = process_darknet()
+    
 
     while True:
         pygame.event.get()
@@ -135,7 +142,6 @@ def play_video():
             outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
             
             if isinstance(outp, str):
-                print("haha error")
                 outp = PREV_FRAME
                 vehicles_color = PREV_COLORS
             else:
@@ -199,6 +205,7 @@ def play_video():
         
 # Function for opening the webcam
 def open_webcam():
+    global network, class_names, width, height
 
     # Open the webcam
     WEBCAM = cv2.VideoCapture(0)
@@ -268,6 +275,17 @@ def open_webcam():
         ROTATE_FRAME = numpy.rot90(FRAME_IN_RGB)
         # Convert frame to pygame's Surface object
         FRAME_TO_SURFACE_OBJECT = pygame.surfarray.make_surface(ROTATE_FRAME).convert()
+
+
+        outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
+        
+        if isinstance(outp, str):
+            outp = PREV_FRAME
+            vehicles_color = PREV_COLORS
+        else:
+            PREV_FRAME = outp
+            PREV_COLORS = vehicles_color
+
         # Render frame in the window
         WINDOW.blit(FRAME_TO_SURFACE_OBJECT, (240, 40))
         # Update the window
@@ -283,6 +301,9 @@ def open_webcam():
                     start()
 
 def main_menu():
+    global network, class_names, width, height
+
+    network, class_names, width, height = process_darknet()
     while True:
         # Set background image
         WINDOW.blit(BG, (0, 0))
