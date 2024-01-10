@@ -72,9 +72,9 @@ def play_video():
     BLACK_COUNT = 0
     WHITE_COUNT = 0
     GRAY_COUNT = 0
+    OTHERS_COUNT = 0
     BLUE_COUNT = 0
     RED_COUNT = 0
-    GREEN_COUNT = 0
 
     while True:
         pygame.event.get()
@@ -96,14 +96,14 @@ def play_video():
         GRAY_TEXT = get_font(20).render("GRAY: " + str(GRAY_COUNT), True, "White")
         GRAY_REC = GRAY_TEXT.get_rect(center=(640, 625))
         
-        BLUE_TEXT = get_font(20).render("BLUE: " + str(BLUE_COUNT), True, "White")
-        BLUE_REC = BLUE_TEXT.get_rect(center=(640, 675))
+        OTHERS_TEXT = get_font(20).render("OTHERS: " + str(OTHERS_COUNT), True, "White")
+        OTHERS_REC = OTHERS_TEXT.get_rect(center=(640, 675))
 
         RED_TEXT = get_font(20).render("RED: " + str(RED_COUNT), True, "White")
         RED_REC = RED_TEXT.get_rect(center=(940, 625))
 
-        GREEN_TEXT = get_font(20).render("GREEN: " + str(GREEN_COUNT), True, "White")
-        GREEN_REC = GREEN_TEXT.get_rect(center=(940, 675))
+        BLUE_TEXT = get_font(20).render("BLUE: " + str(BLUE_COUNT), True, "White")
+        BLUE_REC = BLUE_TEXT.get_rect(center=(940, 675))
 
         # Render the car color counters to window
         WINDOW.blit(BLACK_TEXT, BLACK_REC)
@@ -111,7 +111,7 @@ def play_video():
         WINDOW.blit(GRAY_TEXT, GRAY_REC)
         WINDOW.blit(BLUE_TEXT, BLUE_REC)
         WINDOW.blit(RED_TEXT, RED_REC)
-        WINDOW.blit(GREEN_TEXT, GREEN_REC)
+        WINDOW.blit(OTHERS_TEXT, OTHERS_REC)
 
         # Handle video frames
         SUCCESS, VIDEO_FRAME = VIDEO.read()
@@ -147,9 +147,9 @@ def open_webcam():
     BLACK_COUNT = 0
     WHITE_COUNT = 0
     GRAY_COUNT = 0
+    OTHERS_COUNT = 0
     BLUE_COUNT = 0
     RED_COUNT = 0
-    GREEN_COUNT = 0
 
     while True:
         pygame.event.get()
@@ -163,22 +163,22 @@ def open_webcam():
 
         # Setup the car color counters' texts
         BLACK_TEXT = get_font(20).render("BLACK: " + str(BLACK_COUNT), True, "White")
-        BLACK_REC = BLACK_TEXT.get_rect(center=(340, 630))
+        BLACK_REC = BLACK_TEXT.get_rect(center=(340, 625))
         
         WHITE_TEXT = get_font(20).render("WHITE: " + str(WHITE_COUNT), True, "White")
-        WHITE_REC = WHITE_TEXT.get_rect(center=(340, 680))
+        WHITE_REC = WHITE_TEXT.get_rect(center=(340, 675))
 
         GRAY_TEXT = get_font(20).render("GRAY: " + str(GRAY_COUNT), True, "White")
-        GRAY_REC = GRAY_TEXT.get_rect(center=(640, 630))
+        GRAY_REC = GRAY_TEXT.get_rect(center=(640, 625))
         
-        BLUE_TEXT = get_font(20).render("BLUE: " + str(BLUE_COUNT), True, "White")
-        BLUE_REC = BLUE_TEXT.get_rect(center=(640, 680))
+        OTHERS_TEXT = get_font(20).render("OTHERS: " + str(OTHERS_COUNT), True, "White")
+        OTHERS_REC = OTHERS_TEXT.get_rect(center=(640, 675))
 
         RED_TEXT = get_font(20).render("RED: " + str(RED_COUNT), True, "White")
-        RED_REC = RED_TEXT.get_rect(center=(940, 630))
+        RED_REC = RED_TEXT.get_rect(center=(940, 625))
 
-        GREEN_TEXT = get_font(20).render("GREEN: " + str(GREEN_COUNT), True, "White")
-        GREEN_REC = GREEN_TEXT.get_rect(center=(940, 680))
+        BLUE_TEXT = get_font(20).render("BLUE: " + str(BLUE_COUNT), True, "White")
+        BLUE_REC = BLUE_TEXT.get_rect(center=(940, 675))
 
         # Render the car color counters to window
         WINDOW.blit(BLACK_TEXT, BLACK_REC)
@@ -186,7 +186,7 @@ def open_webcam():
         WINDOW.blit(GRAY_TEXT, GRAY_REC)
         WINDOW.blit(BLUE_TEXT, BLUE_REC)
         WINDOW.blit(RED_TEXT, RED_REC)
-        WINDOW.blit(GREEN_TEXT, GREEN_REC)
+        WINDOW.blit(OTHERS_TEXT, OTHERS_REC)
 
         # Handle video frames
         SUCCESS, VIDEO_FRAME = WEBCAM.read()
