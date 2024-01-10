@@ -1,7 +1,7 @@
 import pygame, sys, cv2, numpy, tkinter, tkinter.filedialog
 from button import Button
-from vc_mask_img import process_img
-from vc_mask_img import process_darknet
+# from vc_mask_img import process_img
+# from vc_mask_img import process_darknet
 
 
 pygame.init()
@@ -84,7 +84,7 @@ def play_video():
     BLUE_COUNT = 0
     RED_COUNT = 0
 
-    network, class_names, width, height = process_darknet()
+    # network, class_names, width, height = process_darknet()
 
     while True:
         pygame.event.get()
@@ -106,17 +106,18 @@ def play_video():
             VIDEO_FRAME = cv2.resize(VIDEO_FRAME, (800, 550))
             # Convert frame to pygame's Surface object
 
-            outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
+            # outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
             
-            if isinstance(outp, str):
-                print("haha error")
-                outp = PREV_FRAME
-                vehicles_color = PREV_COLORS
-            else:
-                PREV_FRAME = outp
-                PREV_COLORS = vehicles_color
+            # if isinstance(outp, str):
+            #     print("haha error")
+            #     outp = PREV_FRAME
+            #     vehicles_color = PREV_COLORS
+            # else:
+            #     PREV_FRAME = outp
+            #     PREV_COLORS = vehicles_color
 
-            VIDEO_SURF = pygame.image.frombuffer(outp.tobytes(), outp.shape[1::-1], "BGR")
+            # VIDEO_SURF = pygame.image.frombuffer(outp.tobytes(), outp.shape[1::-1], "BGR")
+            VIDEO_SURF = pygame.image.frombuffer(VIDEO_FRAME.tobytes(), VIDEO_FRAME.shape[1::-1], "BGR")
             
 
             # Add event handler
