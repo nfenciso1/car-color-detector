@@ -3,7 +3,6 @@ from button import Button
 # from vc_mask_img import process_img
 # from vc_mask_img import process_darknet
 
-
 pygame.init()
 
 # Initialize the program's window
@@ -11,16 +10,19 @@ WINDOW = pygame.display.set_mode((1280, 750))
 pygame.display.set_caption("Car Color Detector")
 
 # Initialize the background images
-BG = pygame.image.load("assets/background.png")
-BG2 = pygame.image.load("assets/background2.jpg")
+BG = pygame.image.load("../assets/background.png")
+BG2 = pygame.image.load("../assets/background2.jpg")
 
 # Function for getting the font and adjusting font size
 def get_font(size): 
-    return pygame.font.Font("assets/font.ttf", size)
+    return pygame.font.Font("../assets/font.ttf", size)
 
 # Function for opening a file manager window
 def prompt_file():
-    FILE_NAME = tkinter.filedialog.askopenfilename(initialdir="./assets/videos")
+    top = tkinter.Tk()
+    top.withdraw()
+    FILE_NAME = tkinter.filedialog.askopenfilename(initialdir="./assets/videos", parent = top)
+    top.destroy()
     return FILE_NAME
 
 # Function to start the program
@@ -39,9 +41,9 @@ def start():
         pygame.draw.rect(WINDOW, (0,0,0), (240,100,800,550))
 
         # Setup buttons
-        PLAY_VID_BUTTON = Button(BG_IMAGE=pygame.image.load("assets/options.png"), POSITION=(645, 300), 
+        PLAY_VID_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 300), 
                             BUTTON_TEXT="PLAY A VIDEO", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
-        OPEN_CAM_BUTTON = Button(BG_IMAGE=pygame.image.load("assets/options.png"), POSITION=(645, 450), 
+        OPEN_CAM_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 450), 
                             BUTTON_TEXT="OPEN THE WEBCAM", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
         for BUTTON in [PLAY_VID_BUTTON, OPEN_CAM_BUTTON]:
             BUTTON.changeColor(PLAY_MOUSE_POS)
@@ -88,6 +90,8 @@ def play_video():
 
     while True:
         pygame.event.get()
+        # Get mouse position
+        PLAY_MOUSE_POS = pygame.mouse.get_pos()
         # Limit the FPS in the application loop
         CLOCK.tick(FPS)
         
@@ -97,8 +101,12 @@ def play_video():
         pygame.draw.rect(WINDOW, (0,0,0), (240,100,800,610))
         vehicles_color = []
 
+        # Setup back button
+        BACK_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/back_button_bg.png"), POSITION=(150, 90), 
+                            BUTTON_TEXT="BACK", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
+        BACK_BUTTON.changeColor(PLAY_MOUSE_POS)
+        BACK_BUTTON.update(WINDOW)
 
-        
         # Handle video frames
         SUCCESS, VIDEO_FRAME = VIDEO.read()
         if SUCCESS:
@@ -119,12 +127,14 @@ def play_video():
             # VIDEO_SURF = pygame.image.frombuffer(outp.tobytes(), outp.shape[1::-1], "BGR")
             VIDEO_SURF = pygame.image.frombuffer(VIDEO_FRAME.tobytes(), VIDEO_FRAME.shape[1::-1], "BGR")
             
-
             # Add event handler
             for EVENT in pygame.event.get():
                 if EVENT.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if EVENT.type == pygame.MOUSEBUTTONDOWN:
+                    if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                        start()
 
             BLACK_COUNT = vehicles_color.count("Black")
             WHITE_COUNT = vehicles_color.count("White")
@@ -168,10 +178,6 @@ def play_video():
         else:
             # When vid is finished, go back to start()
             start()
-
-        
-
-
         
 # Function for opening the webcam
 def open_webcam():
@@ -191,6 +197,8 @@ def open_webcam():
 
     while True:
         pygame.event.get()
+        # Get mouse position
+        PLAY_MOUSE_POS = pygame.mouse.get_pos()
         # Limit the FPS in the application loop
         CLOCK.tick(FPS)
 
@@ -198,6 +206,12 @@ def open_webcam():
         # Second argument = color's RGB value
         # Third argument = (x-axis, y-axis, width, height)
         pygame.draw.rect(WINDOW, (0,0,0), (240,100,800,610))
+
+        # Setup back button
+        BACK_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/back_button_bg.png"), POSITION=(150, 90), 
+                            BUTTON_TEXT="BACK", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
+        BACK_BUTTON.changeColor(PLAY_MOUSE_POS)
+        BACK_BUTTON.update(WINDOW)
 
         # Setup the car color counters' texts
         BLACK_TEXT = get_font(20).render("BLACK: " + str(BLACK_COUNT), True, "White")
@@ -246,6 +260,9 @@ def open_webcam():
             if EVENT.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if EVENT.type == pygame.MOUSEBUTTONDOWN:
+                if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                    start()
 
 def main_menu():
     while True:
@@ -262,9 +279,9 @@ def main_menu():
         LOWER_RECT = LOWER_TEXT.get_rect(center=(640, 275))
 
         # Setup buttons
-        START_BUTTON = Button(BG_IMAGE=pygame.image.load("assets/options.png"), POSITION=(640, 450), 
+        START_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(640, 450), 
                             BUTTON_TEXT="START", FONT=get_font(75), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
-        QUIT_BUTTON = Button(BG_IMAGE=pygame.image.load("assets/options.png"), POSITION=(640, 600), 
+        QUIT_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(640, 600), 
                             BUTTON_TEXT="QUIT", FONT=get_font(75), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
         for BUTTON in [START_BUTTON, QUIT_BUTTON]:
             BUTTON.changeColor(MENU_MOUSE_POS)
