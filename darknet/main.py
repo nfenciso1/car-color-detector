@@ -1,7 +1,7 @@
 import pygame, sys, cv2, numpy, tkinter, tkinter.filedialog
 from button import Button
-# from vc_mask_img import process_img
-# from vc_mask_img import process_darknet
+from vc_mask_img import process_img
+from vc_mask_img import process_darknet
 
 pygame.init()
 
@@ -23,7 +23,15 @@ def prompt_file():
     top.withdraw()
     FILE_NAME = tkinter.filedialog.askopenfilename(initialdir="./assets/videos", parent = top)
     top.destroy()
-    return FILE_NAME
+
+    if FILE_NAME[-3:] == "mp4":
+        return FILE_NAME, "video"
+    else:
+        return FILE_NAME, "image"
+
+    
+
+#TODO: support image input, edit in webcam option
 
 # Function to start the program
 def start():
@@ -42,7 +50,7 @@ def start():
 
         # Setup buttons
         PLAY_VID_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 300), 
-                            BUTTON_TEXT="PLAY A VIDEO", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
+                            BUTTON_TEXT="OPEN MEDIA FILE", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
         OPEN_CAM_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 450), 
                             BUTTON_TEXT="OPEN THE WEBCAM", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
         for BUTTON in [PLAY_VID_BUTTON, OPEN_CAM_BUTTON]:
@@ -71,11 +79,16 @@ def play_video():
     global PREV_FRAME, PREV_COLORS
 
     # Get the video file name
-    FILE_NAME = prompt_file()
+    FILE_NAME, type = prompt_file()
 
-    # Open cam for video capturing
-    VIDEO = cv2.VideoCapture(FILE_NAME)
-    FPS = VIDEO.get(cv2.CAP_PROP_FPS)
+    if type == "video":
+        # Open cam for video capturing
+        VIDEO = cv2.VideoCapture(FILE_NAME)
+        FPS = VIDEO.get(cv2.CAP_PROP_FPS)
+    else:
+        FRAME = cv2.imread(FILE_NAME)
+        FPS = 30.0
+    
     CLOCK = pygame.time.Clock()
 
     # Setup the car color counters
@@ -86,7 +99,7 @@ def play_video():
     BLUE_COUNT = 0
     RED_COUNT = 0
 
-    # network, class_names, width, height = process_darknet()
+    network, class_names, width, height = process_darknet()
 
     while True:
         pygame.event.get()
@@ -107,25 +120,30 @@ def play_video():
         BACK_BUTTON.changeColor(PLAY_MOUSE_POS)
         BACK_BUTTON.update(WINDOW)
 
-        # Handle video frames
-        SUCCESS, VIDEO_FRAME = VIDEO.read()
+        if type == "video":
+            # Handle video frames
+            SUCCESS, VIDEO_FRAME = VIDEO.read()
+        else:
+            VIDEO_FRAME = FRAME
+            SUCCESS = True
+
         if SUCCESS:
             # Resize the frame
             VIDEO_FRAME = cv2.resize(VIDEO_FRAME, (800, 550))
             # Convert frame to pygame's Surface object
 
-            # outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
+            outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)
             
-            # if isinstance(outp, str):
-            #     print("haha error")
-            #     outp = PREV_FRAME
-            #     vehicles_color = PREV_COLORS
-            # else:
-            #     PREV_FRAME = outp
-            #     PREV_COLORS = vehicles_color
+            if isinstance(outp, str):
+                print("haha error")
+                outp = PREV_FRAME
+                vehicles_color = PREV_COLORS
+            else:
+                PREV_FRAME = outp
+                PREV_COLORS = vehicles_color
 
-            # VIDEO_SURF = pygame.image.frombuffer(outp.tobytes(), outp.shape[1::-1], "BGR")
-            VIDEO_SURF = pygame.image.frombuffer(VIDEO_FRAME.tobytes(), VIDEO_FRAME.shape[1::-1], "BGR")
+            VIDEO_SURF = pygame.image.frombuffer(outp.tobytes(), outp.shape[1::-1], "BGR")
+            # VIDEO_SURF = pygame.image.frombuffer(VIDEO_FRAME.tobytes(), VIDEO_FRAME.shape[1::-1], "BGR")
             
             # Add event handler
             for EVENT in pygame.event.get():
