@@ -70,7 +70,19 @@ def process_darknet():
 
     return network, class_names, width, height
 
-def process_img(frame, network, class_names, width, height):
+def process_img(frame, network, class_names, width, height, thres_values):
+    lower_black = thres_values[0][0]
+    upper_black = thres_values[0][1]
+    percent_black = thres_values[0][2]
+
+    lower_white = thres_values[1][0]
+    upper_white = thres_values[1][1]
+    percent_white = thres_values[1][2]
+
+    lower_gray = thres_values[2][0]
+    upper_gray = thres_values[2][1]
+    percent_gray = thres_values[2][2]
+
     try:
         img = frame
         vehicles = []
@@ -100,19 +112,19 @@ def process_img(frame, network, class_names, width, height):
             white = np.sum(mask == 255)
             total = np.sum(mask >- 1)
 
-            if white/total*100 >= 45:
+            if white/total*100 >= percent_black:
                 color = "Black"
             else:
                 mask2 = cv2.inRange(hsv_img, lower_white, upper_white)
                 white2 = np.sum(mask2 == 255)
 
-                if white2/total*100 >= 30:
+                if white2/total*100 >= percent_white:
                     color = "White"
                 else:
                     mask3 = cv2.inRange(hsv_img, lower_gray, upper_gray)
                     white3 = np.sum(mask3 == 255)
 
-                    if white3/total*100 >= 40:
+                    if white3/total*100 >= percent_gray:
                         color = "Gray"
                     else:
                         color = "Other"

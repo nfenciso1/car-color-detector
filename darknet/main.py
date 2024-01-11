@@ -3,6 +3,7 @@ from button import Button
 from vc_mask_img import process_img         # --------- darknet ------------
 from vc_mask_img import process_darknet         # --------- darknet ------------
 import numpy as np
+import pygame_gui
 
 pygame.init()
 
@@ -30,12 +31,69 @@ def prompt_file():
     else:
         return FILE_NAME, "image"
 
-    
+def process_inputs(black_inputs, white_inputs, gray_inputs):
+    # defaults
+    lower_black = np.array([0, 0, 0]) 
+    upper_black = np.array([180, 255, 110]) 
+    percent_black = 45
+    lower_white = np.array([0,0,190])
+    upper_white = np.array([180,50,255])
+    percent_white = 30
+    lower_gray = np.array([0,25,0])
+    upper_gray = np.array([180,70,255])
+    percent_gray = 40
 
-#TODO: support image input, edit in webcam option
+    black = [lower_black, upper_black, percent_black]
+    white = [lower_white, upper_white, percent_white]
+    gray = [lower_gray, upper_gray, percent_gray]
+    thres_values = [black, white, gray]
+    input_values = [black_inputs, white_inputs, gray_inputs]
+
+
+    for i in range(0,3):
+        if not (input_values[i][0] == ""):
+            val = input_values[i][0].split(" ")
+            lower_thres = np.array([int(val[0]), int(val[1]), int(val[2])])
+            thres_values[i][0] = lower_thres
+
+        if not (input_values[i][1] == ""):
+            val = input_values[i][1].split(" ")
+            upper_thres = np.array([int(val[0]), int(val[1]), int(val[2])])
+            thres_values[i][1] = upper_thres
+
+        if not (input_values[i][2] == ""):
+            thres_values[i][2] = int(input_values[i][2])
+
+    return thres_values
+        
 
 # Function to start the program
 def start():
+    # --- for input text ---
+    manager = pygame_gui.UIManager((1280, 750))
+    ub = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((920, 240), (110, 30)), manager=manager,
+                                                object_id='#upper-b')
+    lb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1062, 240), (110, 30)), manager=manager,
+                                                object_id='#lower-b')
+    pb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1204, 240), (40, 30)), manager=manager,
+                                                object_id='#percent-b')
+    uw = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((920, 300), (110, 30)), manager=manager,
+                                                object_id='#upper-w')
+    lw = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1062, 300), (110, 30)), manager=manager,
+                                                object_id='#lower-w')
+    pw = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1204, 300), (40, 30)), manager=manager,
+                                                object_id='#percent-w')
+    ug = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((920, 360), (110, 30)), manager=manager,
+                                                object_id='#upper-g')
+    lg = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1062, 360), (110, 30)), manager=manager,
+                                                object_id='#lower-g')
+    pg = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1204, 360), (40, 30)), manager=manager,
+                                                object_id='#percent-g')
+    
+
+
+    clock = pygame.time.Clock()
+    UI_REFRESH_RATE = clock.tick(60)/1000
     while True:
         pygame.event.get()
 
@@ -47,12 +105,23 @@ def start():
         # Draw a rectangle
         # Second argument = color's RGB value
         # Third argument = (x-axis, y-axis, width, height)
-        pygame.draw.rect(WINDOW, (0,0,0), (240,100,800,550))
+        pygame.draw.rect(WINDOW, (0,0,0), (100,100,800,550))
+
+        BLACK_TEXT = get_font(10).render("black threshold:",True, "White")
+        BLACK_REC = BLACK_TEXT.get_rect(center=(1000, 230))
+        WHITE_TEXT = get_font(10).render("white threshold:",True, "White")
+        WHITE_REC = BLACK_TEXT.get_rect(center=(1000, 290))
+        GRAY_TEXT = get_font(10).render("gray threshold:",True, "White")
+        GRAY_REC = BLACK_TEXT.get_rect(center=(1000, 350))
+        WINDOW.blit(BLACK_TEXT, BLACK_REC)
+        WINDOW.blit(WHITE_TEXT, WHITE_REC)
+        WINDOW.blit(GRAY_TEXT, GRAY_REC)
+
 
         # Setup buttons
-        PLAY_VID_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 300), 
+        PLAY_VID_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(500, 300), 
                             BUTTON_TEXT="OPEN MEDIA FILE", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
-        OPEN_CAM_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(645, 450), 
+        OPEN_CAM_BUTTON = Button(BG_IMAGE=pygame.image.load("../assets/options.png"), POSITION=(500, 450), 
                             BUTTON_TEXT="OPEN THE WEBCAM", FONT=get_font(25), BASE_COLOR="#ffaa1f", HOVER_COLOR="#ff561e")
         for BUTTON in [PLAY_VID_BUTTON, OPEN_CAM_BUTTON]:
             BUTTON.changeColor(PLAY_MOUSE_POS)
@@ -65,9 +134,25 @@ def start():
                 sys.exit()
             if EVENT.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_VID_BUTTON.checkForInput(PLAY_MOUSE_POS):
-                    play_video()
+                    black_inputs = [ub.get_text(), lb.get_text(), pb.get_text()]
+                    white_inputs = [uw.get_text(), lw.get_text(), pw.get_text()]
+                    gray_inputs = [ug.get_text(), lg.get_text(), pg.get_text()]
+                    thres_values = process_inputs(black_inputs, white_inputs, gray_inputs)
+
+                    play_video(thres_values)
                 if OPEN_CAM_BUTTON.checkForInput(PLAY_MOUSE_POS):
-                    open_webcam()
+                    black_inputs = [ub.get_text(), lb.get_text(), pb.get_text()]
+                    white_inputs = [uw.get_text(), lw.get_text(), pw.get_text()]
+                    gray_inputs = [ug.get_text(), lg.get_text(), pg.get_text()]
+                    thres_values = process_inputs(black_inputs, white_inputs, gray_inputs)
+
+                    open_webcam(thres_values)
+
+            manager.process_events(EVENT)
+
+        manager.update(UI_REFRESH_RATE)
+
+        manager.draw_ui(WINDOW)
 
         # Update the window
         pygame.display.update()
@@ -81,7 +166,7 @@ height = 0
 
 
 # Function for playing a video file
-def play_video():
+def play_video(thres_values):
     global PREV_FRAME, PREV_COLORS
     global network, class_names, width, height
 
@@ -139,7 +224,7 @@ def play_video():
             VIDEO_FRAME = cv2.resize(VIDEO_FRAME, (800, 550))
             # Convert frame to pygame's Surface object
 
-            outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)  # --------- darknet ------------
+            outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height, thres_values)  # --------- darknet ------------
             
             if isinstance(outp, str):
                 outp = PREV_FRAME
@@ -204,7 +289,7 @@ def play_video():
             start()
         
 # Function for opening the webcam
-def open_webcam():
+def open_webcam(thres_values):
     global PREV_FRAME, PREV_COLORS
     global network, class_names, width, height
 
@@ -249,7 +334,7 @@ def open_webcam():
         # Handle video frames
         SUCCESS, VIDEO_FRAME = WEBCAM.read()
 
-        outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height)    # --------- darknet ------------
+        outp, vehicles_color = process_img(VIDEO_FRAME, network, class_names, width, height, thres_values)    # --------- darknet ------------
         if isinstance(outp, str):
             outp = PREV_FRAME
             vehicles_color = PREV_COLORS
