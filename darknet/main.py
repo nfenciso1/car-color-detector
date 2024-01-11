@@ -49,7 +49,6 @@ def process_inputs(black_inputs, white_inputs, gray_inputs):
     thres_values = [black, white, gray]
     input_values = [black_inputs, white_inputs, gray_inputs]
 
-
     for i in range(0,3):
         if not (input_values[i][0] == ""):
             val = input_values[i][0].split(" ")
@@ -90,8 +89,6 @@ def start():
     pg = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1204, 360), (40, 30)), manager=manager,
                                                 object_id='#percent-g')
     
-
-
     clock = pygame.time.Clock()
     UI_REFRESH_RATE = clock.tick(60)/1000
     while True:
@@ -170,6 +167,9 @@ def play_video(thres_values):
     global PREV_FRAME, PREV_COLORS
     global network, class_names, width, height
 
+    # Set background image
+    WINDOW.blit(BG2, (0, 0))
+
     # Get the video file name
     FILE_NAME, type = prompt_file()
 
@@ -190,8 +190,6 @@ def play_video(thres_values):
     OTHERS_COUNT = 0
     BLUE_COUNT = 0
     RED_COUNT = 0
-
-    
 
     while True:
         pygame.event.get()
@@ -293,11 +291,13 @@ def open_webcam(thres_values):
     global PREV_FRAME, PREV_COLORS
     global network, class_names, width, height
 
+    # Set background image
+    WINDOW.blit(BG2, (0, 0))
+
     # Create an empty surface
     empty_surface = pygame.Surface((100, 100))  # Replace (100, 100) with your desired dimensions
     empty_surface.fill((255, 255, 255))
     PREV_FRAME = empty_surface
-
 
     # Open the webcam
     WEBCAM = cv2.VideoCapture(0)
