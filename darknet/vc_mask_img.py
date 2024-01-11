@@ -70,6 +70,40 @@ def process_darknet():
 
     return network, class_names, width, height
 
+def get_others(hsv_img):
+    # Flatten the 2D array into a 1D array of pixels
+    pixels = hsv_img.reshape(-1, 3)
+
+    # Calculate the histogram of the pixel values
+    hist = np.zeros((256, 256, 256))
+    for pixel in pixels:
+        #print(pixel)
+        hist[pixel[0], pixel[1], pixel[2]] += 1
+
+    # Find the indices of the most frequent color
+    dominant_indices = np.unravel_index(np.argmax(hist), hist.shape)
+
+    # Convert the indices to HSV values
+    hsv = np.array([dominant_indices[0], dominant_indices[1], dominant_indices[2]], dtype=np.uint8)
+
+    color = "Other"
+    if hsv[0] < 5:
+        color = "Red"
+    elif hsv[0] < 22:
+        color = "Other" #"orange"
+    elif hsv[0] < 33:
+        color = "Other" #"yellow"
+    elif hsv[0] < 78:
+        color = "Other" #"green"
+    elif hsv[0] < 131:
+        color = "Blue"
+    elif hsv[0] < 170:
+        color = "Other" #"violet"
+    else:
+        color = "Red"
+
+    return color
+
 def process_img(frame, network, class_names, width, height, thres_values):
     lower_black = thres_values[0][0]
     upper_black = thres_values[0][1]
@@ -99,12 +133,20 @@ def process_img(frame, network, class_names, width, height, thres_values):
                 left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(
                     bottom * height_ratio)
 
-                vehicles.append(img[int(top):int(bottom), int(left):int(right)])
+                # vehicles.append(img[int(top):int(bottom), int(left):int(right)])
+
+                w_ratio = int((right - left)*.3)
+                h_ratio = int((bottom - top)*.3)
+
+                vehicles.append(img[int(top+h_ratio):int(bottom-h_ratio), int(left+w_ratio):int(right-w_ratio)])
 
         #print(len(vehicles))
+        name = 0
         for i in range(len(vehicles)):
+            name +=1
             #print()
             hsv_img = cv2.cvtColor(vehicles[i], cv2.COLOR_BGR2HSV)
+            cv2.imwrite("{}.jpg".format(name), vehicles[i])
 
 
             mask = cv2.inRange(hsv_img, lower_black, upper_black)
@@ -127,7 +169,8 @@ def process_img(frame, network, class_names, width, height, thres_values):
                     if white3/total*100 >= percent_gray:
                         color = "Gray"
                     else:
-                        color = "Other"
+                        color = get_others(hsv_img)
+                        # color = "Other"
             vehicles_color.append(color)
 
             #print(i, white, total, (white/total)*100)
