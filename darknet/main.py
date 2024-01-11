@@ -4,6 +4,9 @@ from vc_mask_img import process_img         # --------- darknet ------------
 from vc_mask_img import process_darknet         # --------- darknet ------------
 import numpy as np
 import pygame_gui
+import csv
+
+FRAME_INTERVAL = 100
 
 pygame.init()
 
@@ -191,6 +194,13 @@ def play_video(thres_values):
     BLUE_COUNT = 0
     RED_COUNT = 0
 
+    with open('colorCount.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        c = ["Black", "White", "Gray", "Red", "Blue", "Others","","obtained for every "+str(FRAME_INTERVAL)+" frames"]
+        writer.writerows([c])
+
+    frame = 0
+
     while True:
         pygame.event.get()
         # Get mouse position
@@ -282,6 +292,14 @@ def play_video(thres_values):
             # Update the window
             pygame.display.update()
 
+            if frame == FRAME_INTERVAL:
+                frame = -1
+                with open('colorCount.csv', 'a', newline='') as csv_file:
+                    writer = csv.writer(csv_file)
+                    c = [[BLACK_COUNT, WHITE_COUNT, GRAY_COUNT, RED_COUNT, BLUE_COUNT, OTHERS_COUNT]]
+                    writer.writerows(c)
+
+            frame += 1
         else:
             # When vid is finished, go back to start()
             start()
@@ -311,6 +329,13 @@ def open_webcam(thres_values):
     OTHERS_COUNT = 0
     BLUE_COUNT = 0
     RED_COUNT = 0
+
+    with open('colorCount.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        c = ["Black", "White", "Gray", "Red", "Blue", "Others","","obtained for every "+str(FRAME_INTERVAL)+" frames"]
+        writer.writerows([c])
+
+    frame = 0
 
     while True:
         pygame.event.get()
@@ -389,6 +414,15 @@ def open_webcam(thres_values):
         # Update the window
         pygame.display.update()
 
+        if frame == FRAME_INTERVAL:
+            frame = -1
+            with open('colorCount.csv', 'a', newline='') as csv_file:
+                writer = csv.writer(csv_file)
+                c = [[BLACK_COUNT, WHITE_COUNT, GRAY_COUNT, RED_COUNT, BLUE_COUNT, OTHERS_COUNT]]
+                writer.writerows(c)
+
+        frame += 1
+        
         # Add event handler
         for EVENT in pygame.event.get():
             if EVENT.type == pygame.QUIT:
